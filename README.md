@@ -54,7 +54,7 @@ Request
 
 ```json
 {
-  "repoUrl": "https://github.com/user/project,git"
+  "repoUrl": "https://github.com/user/project.git"
 }
 ```
 
