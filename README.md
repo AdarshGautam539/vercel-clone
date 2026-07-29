@@ -81,3 +81,14 @@ Response
 - [ ] Deployment logs
 - [ ] Build status API
 
+## Future Improvements (hopefully I don't get engaged in another project)
+
+- pnpm & Yarn support
+- Parallel workers
+- Deployment logs
+- Build caching
+- Kubernetes support
+- Custom domains
+- Authentication
+
+---
