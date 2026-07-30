@@ -1,13 +1,12 @@
 import { Worker } from 'bullmq';
 import { connection } from '../queue/connection.js';
-import { downloadDeployment } from '../storage/download.js';
+import { buildDeployment } from '../services/buildService.js';
 
 const worker = new Worker("deployments", async (job) => {
   console.log("Received job:");
   console.log(job.data);
 
-  const deploymentPath = await downloadDeployment(job.data.deploymentId);
-  console.log(deploymentPath);
+  await buildDeployment(job.data.deploymentId);
 },
   {
     connection,
