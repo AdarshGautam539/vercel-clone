@@ -27,7 +27,6 @@ interface DeployBody {
   repoUrl: string;
 }
 
-// Concurrency pool helper
 async function runWithLimit<T>(concurrency: number, items: T[], fn: (item: T) => Promise<any>) {
   const promises: Promise<any>[] = [];
   const executing: Promise<any>[] = [];
@@ -64,20 +63,17 @@ app.post<{ Body: DeployBody }>('/deploy', async (request, reply) => {
     });
     await git.clone(repoUrl, outputPath);
 
-    // Collect all files to upload
     const files: string[] = [];
     for await (const filePath of getAllFiles(outputPath)) {
       files.push(filePath);
     }
 
-    // Upload files in parallel with a concurrency limit of 5
     await runWithLimit(5, files, async (filePath) => {
       const relativePath = path.relative(outputPath, filePath);
       const mimeType = getMimeType(filePath);
       await uploadFile(filePath, `${id}/${relativePath}`, mimeType);
     });
 
-    // Enqueue build job EXACTLY ONCE after all files are successfully uploaded
     await deploymentQueue.add("build", {
       deploymentId: id,
     });
@@ -108,7 +104,6 @@ app.post<{ Body: DeployBody }>('/deploy', async (request, reply) => {
 
 const start = async () => {
   try {
-    // Perform startup cleanups
     try {
       await fs.rm(OUTPUT_DIR, { recursive: true, force: true });
       await fs.rm("tmp", { recursive: true, force: true });
@@ -117,7 +112,6 @@ const start = async () => {
       console.error("Failed to clean directories on startup:", cleanupErr);
     }
 
-    // Ensure bucket exists
     await ensureBucketExists("vercel");
 
     await app.listen({

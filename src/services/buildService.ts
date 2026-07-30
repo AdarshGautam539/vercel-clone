@@ -6,7 +6,6 @@ import { getAllFiles } from '../getAllFiles.js';
 import { uploadFile } from '../storage/upload.js';
 import { getMimeType } from '../utils.js';
 
-// Concurrency pool helper
 async function runWithLimit<T>(concurrency: number, items: T[], fn: (item: T) => Promise<any>) {
   const promises: Promise<any>[] = [];
   const executing: Promise<any>[] = [];
@@ -52,7 +51,6 @@ async function uploadBuildArtifacts(deploymentId: string, projectPath: string) {
     files.push(filePath);
   }
 
-  // Upload files in parallel with concurrency limit of 5
   await runWithLimit(5, files, async (filePath) => {
     const relative = path.relative(uploadSourcePath, filePath);
     const mimeType = getMimeType(filePath);

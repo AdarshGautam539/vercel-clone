@@ -31,7 +31,6 @@ async function downloadObject(key: string, destination: string) {
   await fs.writeFile(destination, bytes);
 }
 
-// Concurrency pool helper
 async function runWithLimit<T>(concurrency: number, items: T[], fn: (item: T) => Promise<any>) {
   const promises: Promise<any>[] = [];
   const executing: Promise<any>[] = [];
@@ -59,7 +58,6 @@ export async function downloadDeployment(deploymentId: string): Promise<string> 
 
   const objects = await listDeploymentObjects(deploymentId);
 
-  // Download files in parallel with a concurrency limit of 5
   await runWithLimit(5, objects, async (object) => {
     if (!object.Key) return;
     const relativePath = object.Key.replace(`${deploymentId}/`, "");
