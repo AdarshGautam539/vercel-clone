@@ -25,25 +25,6 @@ A lightweight, queue-based, self-hosted frontend deployment platform and build s
 
 ---
 
-## 🏗️ System Architecture
-
-```mermaid
-graph TD
-    Client[Client Request] -->|1. POST /deploy| API[Fastify API Server]
-    API -->|2. git clone| OutputDir[output/ directory]
-    API -->|3. parallel upload| Storage[(MinIO / S3 Storage)]
-    API -->|4. enqueue build job| Redis[(Redis / BullMQ)]
-    
-    subgraph Build Worker
-        Worker[BullMQ Worker] -->|5. pull job| Redis
-        Worker -->|6. download source| Storage
-        Worker -->|7. npm install & npm run build| Bash[execa subprocess]
-        Worker -->|8. upload assets with MIME headers| Storage
-    end
-```
-
----
-
 ## 💻 Setup & Installation
 
 ### 1. Prerequisites
