@@ -8,8 +8,8 @@ import { getAllFiles } from './getAllFiles.js';
 import { uploadFile } from './storage/upload.js';
 import { deploymentQueue } from './queue/deploymentQueue.js';
 import { ensureBucketExists } from './storage/minio.js';
+import fastifyRateLimit from '@fastify/rate-limit';
 
-const PORT = 3000;
 const HOST = '0.0.0.0';
 const OUTPUT_DIR = "output";
 
@@ -19,9 +19,13 @@ const app = Fastify({
 
 app.register(fastifyCors);
 
-app.get('/', async (request, reply) => {
-  return { hello: 'world' };
-});
+app.register(fastifyRateLimit, {
+  global: false,
+}),
+
+  app.get('/', async (request, reply) => {
+    return { hello: 'world' };
+  });
 
 interface DeployBody {
   repoUrl: string;
@@ -42,7 +46,8 @@ async function runWithLimit<T>(concurrency: number, items: T[], fn: (item: T) =>
   await Promise.all(promises);
 }
 
-app.post<{ Body: DeployBody }>('/deploy', async (request, reply) => {
+app.post<{ Body: DeployBody }>('/deploy', { config: { rateLimit: { max: 5, timeWindow: '1 minute', }, }, }, async (request, reply) => {
+
   const { repoUrl } = request.body;
   if (!repoUrl) {
     return reply.status(400).send({ error: "repoUrl is required" });

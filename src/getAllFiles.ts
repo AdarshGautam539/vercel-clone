@@ -2,7 +2,6 @@
 * This is a helper fucntion that walks the directories Recursively
 */
 
-
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
