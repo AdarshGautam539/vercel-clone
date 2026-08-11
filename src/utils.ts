@@ -1,15 +1,14 @@
-import { randomBytes } from "node:crypto";
+import { randomInt } from "node:crypto";
 import path from "node:path";
 
 const alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 export function generate(length = 8): string {
-  const bytes = randomBytes(length);
-
   let id = "";
 
   for (let i = 0; i < length; i++) {
-    id += alphabet[bytes[i]! % alphabet.length];
+    const index = randomInt(alphabet.length);
+    id += alphabet[index];
   }
   return id;
 }
