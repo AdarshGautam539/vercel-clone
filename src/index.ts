@@ -11,6 +11,7 @@ import { ensureBucketExists } from './storage/minio.js';
 import fastifyRateLimit from '@fastify/rate-limit';
 
 const HOST = '0.0.0.0';
+const PORT = Number(process.env.PORT) || 3000;
 const OUTPUT_DIR = "output";
 
 const app = Fastify({
