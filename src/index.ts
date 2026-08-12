@@ -30,7 +30,7 @@ app.get('/', async (request, reply) => {
 });
 
 app.get('/deployments/:id', async (request, reply) => {
-  const { id } = request.params as { id: string };
+  const { id } = request.params as { id: string; '*': string };
 
   return reply.redirect(`/deployments/${id}/`, 308);
 });
