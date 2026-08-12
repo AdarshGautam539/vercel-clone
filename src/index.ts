@@ -9,7 +9,7 @@ import { uploadFile } from './storage/upload.js';
 import { deploymentQueue } from './queue/deploymentQueue.js';
 import { ensureBucketExists } from './storage/minio.js';
 import fastifyRateLimit from '@fastify/rate-limit';
-import { request } from 'node:http';
+import { getObjectStream } from './storage/download.js';
 
 const HOST = '0.0.0.0';
 const PORT = Number(process.env.PORT) || 3000;
@@ -30,9 +30,33 @@ app.get('/', async (request, reply) => {
 });
 
 app.get('/deployments/:id', async (request, reply) => {
-  const { id } = request.params as { id: string; '*': string };
+  const { id } = request.params as {
+    id: string;
+  };
+  return reply.redirect(`deployments/${id}/`, 308);
+});
 
-  return reply.redirect(`/deployments/${id}/`, 308);
+app.get('/deployments/:id/*', async (request, reply) => {
+  const { id, '*': requestedPath } = request.params as {
+    id: string;
+    '*': string;
+  };
+  const cleanPath = requestedPath || 'index.html';
+  const objectKey = `builds/${id}/${cleanPath}`;
+  const { stream, contentLength } = await getObjectStream(objectKey);
+
+  request.log.info({
+    deploymentId: id,
+    requestedPath,
+    objectKey,
+  });
+
+  reply.type(getMimeType(cleanPath));
+
+  if (contentLength !== undefined) {
+    reply.header('Content-Length', contentLength);
+  }
+  return reply.send(stream);
 });
 
 interface DeployBody {
