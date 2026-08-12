@@ -9,6 +9,7 @@ import { uploadFile } from './storage/upload.js';
 import { deploymentQueue } from './queue/deploymentQueue.js';
 import { ensureBucketExists } from './storage/minio.js';
 import fastifyRateLimit from '@fastify/rate-limit';
+import { request } from 'node:http';
 
 const HOST = '0.0.0.0';
 const PORT = Number(process.env.PORT) || 3000;
@@ -22,11 +23,17 @@ app.register(fastifyCors);
 
 app.register(fastifyRateLimit, {
   global: false,
-}),
+});
 
-  app.get('/', async (request, reply) => {
-    return { hello: 'world' };
-  });
+app.get('/', async (request, reply) => {
+  return { hello: 'world' };
+});
+
+app.get('/deployments/:id', async (request, reply) => {
+  const { id } = request.params as { id: string };
+
+  return reply.redirect(`/deployments/${id}/`, 308);
+});
 
 interface DeployBody {
   repoUrl: string;
