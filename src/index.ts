@@ -1,5 +1,5 @@
 import Fastify from 'fastify';
-import { generate, getMimeType } from './utils.js';
+import { generate, getMimeType, isSafeDeploymentPath } from './utils.js';
 import fastifyCors from '@fastify/cors';
 import { simpleGit } from 'simple-git';
 import fs from 'node:fs/promises';
@@ -14,6 +14,7 @@ import { getObjectStream } from './storage/download.js';
 const HOST = '0.0.0.0';
 const PORT = Number(process.env.PORT) || 3000;
 const OUTPUT_DIR = "output";
+const deploymentIdPattern = /^[A-Za-z0-9]+$/;
 
 const app = Fastify({
   logger: true,
@@ -41,6 +42,18 @@ app.get('/deployments/:id/*', async (request, reply) => {
     id: string;
     '*': string;
   };
+
+  if (!deploymentIdPattern.test(id)) {
+    return reply.status(400).send({
+      error: 'Invalid deployment ID',
+    });
+  }
+  if (!isSafeDeploymentPath(requestedPath)) {
+    return reply.status(400).send({
+      error: 'Invalid deployment path',
+    });
+  }
+
   const cleanPath = requestedPath || 'index.html';
   const objectKey = `builds/${id}/${cleanPath}`;
 
