@@ -67,3 +67,17 @@ export async function downloadDeployment(deploymentId: string): Promise<string> 
 
   return deploymentPath;
 }
+export async function getObjectStream(objectKey: string) {
+  const response = await s3.send(new GetObjectCommand({
+    Bucket: BUCKET,
+    Key: objectKey,
+  }));
+
+  if (!response.Body) {
+    throw new Error(`No body returned for object: ${objectKey}`);
+  }
+  return {
+    stream: response.Body,
+    contentLength: response.ContentLength,
+  };
+}
