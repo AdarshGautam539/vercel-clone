@@ -20,11 +20,11 @@ This is a queue-based frontend build server and hosting platform. You give it a 
 
 ## 🚀 Key Features
 
-*   **📦 Smart Build Detection:** It automatically scans the repository on clone. If it finds a `package.json`, it runs a standard `npm install` and `npm run build` flow. If not, it treats it as a pure static site (vanilla HTML/CSS/JS) and bypasses compilation completely.
-*   **⚡ Concurrency-Limited Transfers:** S3 uploads and downloads are parallelized up to a configurable threshold (default: 5 concurrent files) using a custom promise-race pool. This prevents network congestion and file-handle starvation.
-*   **🧼 Auto-Cleanup (No Disk Bloat):** The API server and build workers immediately purge their working directory checkouts (`output/` and `tmp/`) upon finishing uploads/builds (or even if a job fails). Additionally, any leftover stale files are swept away automatically on system boot.
-*   **📁 Proper Browser Execution (MIME-Type Mapping):** The app maps file extensions (`.html`, `.js`, `.css`, `.svg`, `.png`, etc.) to standard `Content-Type` headers when fetching assets from MinIO. Your browser will execute code and show images directly instead of prompting download popups.
-*   **🔒 Simple Path Traversal Defense:** Includes guardrails that verify requested URLs do not contain directory traversal attempts (e.g. `..`), keeping other deployments private.
+*   ** Smart Build Detection:** It automatically scans the repository on clone. If it finds a `package.json`, it runs a standard `npm install` and `npm run build` flow. If not, it treats it as a pure static site (vanilla HTML/CSS/JS) and bypasses compilation completely.
+*   ** Concurrency-Limited Transfers:** S3 uploads and downloads are parallelized up to a configurable threshold (default: 5 concurrent files) using a custom promise-race pool. This prevents network congestion and file-handle starvation.
+*   ** Auto-Cleanup (No Disk Bloat):** The API server and build workers immediately purge their working directory checkouts (`output/` and `tmp/`) upon finishing uploads/builds (or even if a job fails). Additionally, any leftover stale files are swept away automatically on system boot.
+*   ** Proper Browser Execution (MIME-Type Mapping):** The app maps file extensions (`.html`, `.js`, `.css`, `.svg`, `.png`, etc.) to standard `Content-Type` headers when fetching assets from MinIO. Your browser will execute code and show images directly instead of prompting download popups.
+*   ** Simple Path Traversal Defense:** Includes guardrails that verify requested URLs do not contain directory traversal attempts (e.g. `..`), keeping other deployments private.
 
 ---
 
