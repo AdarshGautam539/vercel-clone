@@ -6,39 +6,6 @@ This is a queue-based frontend build server and hosting platform. You give it a 
 
 ---
 
-Here's the birds-eye view of how a deployment moves through the system:
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant API as Fastify API Server
-    participant Redis as Redis (BullMQ)
-    participant Worker as Build Worker
-    participant S3 as MinIO (S3 Storage)
-
-    User->>API: POST /deploy { repoUrl }
-    Note over API: Clones repo locally
-    API->>S3: Upload raw source files (parallelized)
-    Note over API: Deletes local clone
-    API->>Redis: Queue deployment job
-    API-->>User: 201 Created { id }
-    
-    Redis->>Worker: Pick up job
-    Worker->>S3: Download raw source files
-    alt Has package.json
-        Note over Worker: npm install && npm run build
-        Worker->>S3: Upload dist/ (parallelized)
-    else Raw HTML/CSS/JS (Static Site)
-        Note over Worker: Skip build
-        Worker->>S3: Upload raw source files (parallelized)
-    end
-    Note over Worker: Deletes local build folder
-    
-    User->>API: GET /deployments/:id/
-    API->>S3: Stream index.html (MIME mapped)
-    API-->>User: Rendered static site
-```
-
 ---
 
 ## 🛠️ The Tech Stack
