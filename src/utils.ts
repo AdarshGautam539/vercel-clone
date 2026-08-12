@@ -40,3 +40,11 @@ export function getMimeType(filePath: string): string {
   const ext = path.extname(filePath).toLowerCase();
   return MIME_MAP[ext] || "application/octet-stream";
 }
+
+export function isSafeDeploymentPath(requestedPath: string): boolean {
+  const segments = requestedPath.split('/');
+
+  return !segments.some(
+    segment => segment === '..' || segment === '.'
+  );
+}

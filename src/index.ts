@@ -14,6 +14,7 @@ import { getDeploymentAsset } from './services/deploymentService.js';
 const HOST = '0.0.0.0';
 const PORT = Number(process.env.PORT) || 3000;
 const OUTPUT_DIR = "output";
+const deploymentIdPattern = /^[A-Za-z0-9]+$/;
 
 const app = Fastify({
   logger: true,
@@ -33,6 +34,11 @@ app.get('/deployments/:id', async (request, reply) => {
   const { id } = request.params as {
     id: string;
   };
+  if (!deploymentIdPattern.test(id)) {
+    return reply.status(400).send({
+      error: 'Invalid deployment ID',
+    });
+  }
   return reply.redirect(`/deployments/${id}/`, 308);
 });
 
