@@ -43,20 +43,39 @@ app.get('/deployments/:id/*', async (request, reply) => {
   };
   const cleanPath = requestedPath || 'index.html';
   const objectKey = `builds/${id}/${cleanPath}`;
-  const { stream, contentLength } = await getObjectStream(objectKey);
 
-  request.log.info({
-    deploymentId: id,
-    requestedPath,
-    objectKey,
-  });
+  try {
+    const { stream, contentLength } = await getObjectStream(objectKey);
 
-  reply.type(getMimeType(cleanPath));
+    request.log.info({
+      deploymentId: id,
+      requestedPath,
+      objectKey,
+    });
 
-  if (contentLength !== undefined) {
-    reply.header('Content-Length', contentLength);
+    reply.type(getMimeType(cleanPath));
+
+    if (contentLength !== undefined) {
+      reply.header('Content-Length', contentLength);
+    }
+    return reply.send(stream);
+
+  } catch (err: any) {
+    if (err.name === 'NoSuchKey') {
+      return reply.status(404).send({
+        error: 'Deployment asset not found',
+      });
+    }
+    request.log.error({
+      err,
+      deploymentId: id,
+      objectKey,
+    });
+
+    return reply.status(500).send({
+      error: 'Failed to retrieve deployment asset',
+    });
   }
-  return reply.send(stream);
 });
 
 interface DeployBody {
