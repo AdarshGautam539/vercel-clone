@@ -6,8 +6,6 @@ This is a queue-based frontend build server and hosting platform. You give it a 
 
 ---
 
-## 🏗️ How it Works under the Hood
-
 Here's the birds-eye view of how a deployment moves through the system:
 
 ```mermaid
@@ -63,7 +61,7 @@ sequenceDiagram
 
 ---
 
-## 💻 Quick Start & Setup
+## Setup
 
 Make sure you have **Node.js (v18+)**, **Git**, and **Docker** installed.
 
@@ -129,13 +127,3 @@ http://localhost:3000/deployments/uR8x9mZa/
 The server will look for `index.html` inside your deployment build directory and stream it straight to your browser.
 
 ---
-
-## 💡 Notes & Lessons Learned
-
-*   **Rate Limiting:** `/deploy` is rate-limited out-of-the-box (5 deploy requests per minute) to protect the server from getting overwhelmed by rogue scripts.
-*   **Why queues matter:** By separation of concerns (API Server vs Build Worker), if the build worker crashes due to bad code or memory constraints, the API server remains completely unaffected and active.
-*   **Storage layout:** We segment raw source code separately from build outputs (raw goes into `<id>/` while compiled files go into `builds/<id>/`). This ensures our worker starts with clean sources, while browser clients only ever see the final product.
-
----
-
-*Disclaimer: This is a learning experiment. Please do not run production pipelines on this or use it to host sensitive projects — it lacks isolated build environments (containers/sandboxing), authentication, and custom domain routing!*
