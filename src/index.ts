@@ -1,5 +1,5 @@
 import Fastify from 'fastify';
-import { generate, getMimeType, isSafeDeploymentPath } from './utils.js';
+import { generate, getMimeType } from './utils.js';
 import fastifyCors from '@fastify/cors';
 import { simpleGit } from 'simple-git';
 import fs from 'node:fs/promises';
@@ -9,12 +9,11 @@ import { uploadFile } from './storage/upload.js';
 import { deploymentQueue } from './queue/deploymentQueue.js';
 import { ensureBucketExists } from './storage/minio.js';
 import fastifyRateLimit from '@fastify/rate-limit';
-import { getObjectStream } from './storage/download.js';
+import { getDeploymentAsset } from './services/deploymentService.js';
 
 const HOST = '0.0.0.0';
 const PORT = Number(process.env.PORT) || 3000;
 const OUTPUT_DIR = "output";
-const deploymentIdPattern = /^[A-Za-z0-9]+$/;
 
 const app = Fastify({
   logger: true,
@@ -34,7 +33,7 @@ app.get('/deployments/:id', async (request, reply) => {
   const { id } = request.params as {
     id: string;
   };
-  return reply.redirect(`deployments/${id}/`, 308);
+  return reply.redirect(`/deployments/${id}/`, 308);
 });
 
 app.get('/deployments/:id/*', async (request, reply) => {
@@ -43,22 +42,8 @@ app.get('/deployments/:id/*', async (request, reply) => {
     '*': string;
   };
 
-  if (!deploymentIdPattern.test(id)) {
-    return reply.status(400).send({
-      error: 'Invalid deployment ID',
-    });
-  }
-  if (!isSafeDeploymentPath(requestedPath)) {
-    return reply.status(400).send({
-      error: 'Invalid deployment path',
-    });
-  }
-
-  const cleanPath = requestedPath || 'index.html';
-  const objectKey = `builds/${id}/${cleanPath}`;
-
   try {
-    const { stream, contentLength } = await getObjectStream(objectKey);
+    const { stream, contentLength, contentType, objectKey } = await getDeploymentAsset(id, requestedPath);
 
     request.log.info({
       deploymentId: id,
@@ -66,7 +51,8 @@ app.get('/deployments/:id/*', async (request, reply) => {
       objectKey,
     });
 
-    reply.type(getMimeType(cleanPath));
+    reply.type(contentType);
+
 
     if (contentLength !== undefined) {
       reply.header('Content-Length', contentLength);
@@ -74,15 +60,22 @@ app.get('/deployments/:id/*', async (request, reply) => {
     return reply.send(stream);
 
   } catch (err: any) {
-    if (err.name === 'NoSuchKey') {
-      return reply.status(404).send({
-        error: 'Deployment asset not found',
+    if (err.statusCode === 400) {
+      return reply.status(400).send({
+        error: err.message,
       });
     }
+
+    if (err.name === 'NoSuchKey') {
+      return reply.status(404).send({
+        error: 'deployment asset not found',
+      });
+    }
+
     request.log.error({
       err,
       deploymentId: id,
-      objectKey,
+      requestedPath,
     });
 
     return reply.status(500).send({
