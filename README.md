@@ -1,4 +1,4 @@
-# 🚀 Mini-Vercel: Self-Hosted Frontend Deployment Engine
+# Mini-Vercel: Self-Hosted Frontend Deployment Engine
 
 Ever wondered what platforms like Vercel or Netlify actually do under the hood when you push code? I did. So, I built a lightweight, self-hosted clone to figure out the plumbing. 
 
@@ -8,7 +8,7 @@ This is a queue-based frontend build server and hosting platform. You give it a 
 
 ---
 
-## 🛠️ The Tech Stack
+## The Tech Stack
 
 *   **API Layer:** [Fastify](https://fastify.dev/) (extremely fast, low-overhead Node.js framework).
 *   **Background Jobs:** [BullMQ](https://bullmq.io/) backed by **Redis** for robust, asynchronous task queueing.
@@ -18,7 +18,7 @@ This is a queue-based frontend build server and hosting platform. You give it a 
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 *   ** Smart Build Detection:** It automatically scans the repository on clone. If it finds a `package.json`, it runs a standard `npm install` and `npm run build` flow. If not, it treats it as a pure static site (vanilla HTML/CSS/JS) and bypasses compilation completely.
 *   ** Concurrency-Limited Transfers:** S3 uploads and downloads are parallelized up to a configurable threshold (default: 5 concurrent files) using a custom promise-race pool. This prevents network congestion and file-handle starvation.
